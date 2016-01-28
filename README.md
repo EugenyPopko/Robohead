@@ -13,3 +13,4 @@ Requirements:
  * POCO libraries (tested on 1.6.1)
  * SQLite database
 
+Working program example: http://www.youtube.com/watch?v=7nRnFn0vSHQ
