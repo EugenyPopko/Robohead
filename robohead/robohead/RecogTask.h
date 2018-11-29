@@ -76,16 +76,16 @@ private:
 	virtual void run();		///<Запуск потока распознавания кадров
 
     void training(void); ///<Обучение
-	int recognize(void); //распознавание
+    int recognize(void); //распознавание
     void PCA(void); //метод главных компонент
     void storeTrainingData(void);
     int loadTrainingData();
     int findNearestNeighbor(float* projectedTestFace);
     int loadFaces(); //загрузка изображений
     void detectFaces(IplImage* img, int ident);//обнаружение лиц
-	int	loadBase(); //загрузка базы изображений
-	void SendNewFace(int id, int x, int y);
-	int addFace(char *name); //добавить новое лицо
+    int	loadBase(); //загрузка базы изображений
+    void SendNewFace(int id, int x, int y);
+    int addFace(char *name); //добавить новое лицо
 
     IplImage ** faceImgArr; // массив изображений лиц
     CvMat    *  personNumTruthMat;
@@ -97,8 +97,8 @@ private:
     CvMat * projectedTrainFaceMat; // спроецированные лица
     CvHaarClassifierCascade *cascade_f; //классификатор
     CvMemStorage *storage; //структура storage
-	IplImage* testImg;
-	CvMat * trainPersonNumMat;
+    IplImage* testImg;
+    CvMat * trainPersonNumMat;
 	
 
 };

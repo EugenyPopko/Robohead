@@ -1,5 +1,5 @@
 /**	\file ReciverTask.h
-		\brief Файл с описанием класса потока приема кадров
+		\brief Description of class for frames receiving
 */
 #ifndef RECIVER_TASK
 #define RECIVER_TASK
@@ -12,33 +12,33 @@ using Poco::Runnable;
 
 
 
-/** \struct MessageFromSynch	
-     \brief Структура сообщения, передаваемого в распознавание. 
+/** \struct MessageFromServo	
+     \brief Message from robot 
  */
 struct MessageFromServo	
 {
 
-	int id;			///<идентификатор
-	int x;			///<идентификатор
-	int y;			///<идентификатор
+	int id;			///<id of request
+	int x;			///<x-coord.
+	int y;			///<y-coord.
 };
 
 /**
 	\struct cadr_receive
-	\brief Параметры передачи данных
+	\brief IPC parameters
 */
 typedef struct
 {
 
-	string servo_application_ip;	///<IP-адрес для модуля серво
-	int servo_application_socket;	///<номер порта для модуля серво
+	string servo_application_ip;	///<IP-adress of servo module
+	int servo_application_socket;	///<Port number
 
 } cadr_receive;
 
 
 /**
 	\class ReciverTask
-	\brief Класс для приема данных от приложения серво
+	\brief Class for receiving data from servo app
 */
 class ReciverTask : public Runnable
 {
@@ -50,10 +50,10 @@ public:
 
 private:
 
-	MessageFromServo m_servo;  ///<Сообщение, передаваемое в распознавание
+	MessageFromServo m_servo;  ///<Msg to recognition
 
 	
-	virtual void run();	///<Запуск потока приема кадров
+	virtual void run();	///<Start thread
 };
 
 #endif

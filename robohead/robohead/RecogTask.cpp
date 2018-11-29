@@ -45,14 +45,14 @@ using Poco::PatternFormatter;
 using namespace std;
 
 
-///ќсновной массив, содержащий базу изображений
+///Array of images
 faces_main facesDB[MAX_IMG_COUNT]; 
 
 extern Mutex mut_new_data;
 extern deque<MessageFromServo> deq;
 
 /*****************************************************************************/
-//«агрузка базы SQLite
+//Load DB SQLite
 int RecogTask::loadBase()
 {
     int rc;
@@ -97,7 +97,7 @@ int RecogTask::loadBase()
 }
 
 /*****************************************************************************/
-//ƒобавл€ем лицо и им€
+//Add face and name
 int RecogTask::addFace(char *name)
 {
     sqlite3 *db;
@@ -140,12 +140,12 @@ int RecogTask::addFace(char *name)
 }
 
 /*****************************************************************************/
-//загрузка данных из facedata.xml
+//Load data from facedata.xml
 int RecogTask::loadTrainingData()
 {
     CvFileStorage * fileStorage;
 
-    //открываем файл
+    //open file
     fileStorage = cvOpenFileStorage( "facedata.xml", 0, CV_STORAGE_READ );
     if( !fileStorage )
     {
@@ -173,13 +173,13 @@ int RecogTask::loadTrainingData()
 }
 
 /*****************************************************************************/
-//«агрузка изображений лиц
+//Load images of faces
 int RecogTask::loadFaces()
 {
     char imgFilename[512];
     int iFace, nFaces=0;
 
-	//загружаем базу
+	//load base
 	nFaces=loadBase();
 
     faceImgArr        = (IplImage **)cvAlloc( nFaces*sizeof(IplImage *) );
@@ -242,7 +242,7 @@ int RecogTask::findNearestNeighbor(float* projectedTestFace)
     return iNearest;
 }
 /*****************************************************************************/
-//сохранить данные в facedata.xml
+//save data in facedata.xml
 void RecogTask::storeTrainingData(void)
 {
     CvFileStorage * fileStorage;
@@ -313,7 +313,7 @@ void RecogTask::PCA(void)
 }
 
 /*****************************************************************************/
-//–аспознавание
+//Recognition
 int RecogTask::recognize(void)
 {
     
@@ -333,7 +333,7 @@ int RecogTask::recognize(void)
 }
 
 /*****************************************************************************/
-//обучение
+//Training
 void RecogTask::training(void)
 {
 
@@ -366,7 +366,7 @@ void RecogTask::training(void)
 }
 
 /*****************************************************************************/
-//отправл€ем новое лицо серво-модулю
+//Send new face to servo
 void RecogTask::SendNewFace(int id, int x, int y)
 {
  MessageFromServo msg;
@@ -382,7 +382,7 @@ void RecogTask::SendNewFace(int id, int x, int y)
 }
 
 /*****************************************************************************/
-//–еализует обнаружение лица в кадре
+//Detect face
 void RecogTask::detectFaces(IplImage* img, int ident)
 {
     int i,j;
@@ -399,7 +399,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
 
     int a, b, k;
 
-	//считываем обнаруженную область лица
+	//read rect of face
     for (i = r->y, a = 0; i < r->y + r->height, a < r->height; ++i, ++a){
         for (j = r->x, b = 0; j < r->x + r->width, b < r->width; ++j, ++b){
             for ( k = 0; k < rec_p_.channels; ++k){
@@ -411,9 +411,9 @@ void RecogTask::detectFaces(IplImage* img, int ident)
 
 	char bufstr[64];
 
-    if (ident>0)     // если пришел запрос на добавление нового лица
+    if (ident>0)     // if query for adding new face
     {
-		loadBase(); //считываем базу
+		loadBase(); //load base
 
         IplImage* tmpsize = cvCreateImage(cvSize(IMG_WIDTH,IMG_HEIGHT),img->depth, rec_p_.channels);
         cvResize(img1,tmpsize,CV_INTER_LINEAR);
@@ -448,7 +448,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
 
 	cvReleaseImage(&img1);
 
-	int response = recognize(); //попытка распознать
+	int response = recognize(); //try recognize
 
     sprintf_s(bufstr, 64, "Unknown");
 
@@ -458,7 +458,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
     cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 1, CV_AA);
     cvPutText(img, bufstr, cvPoint(r->x, r->y+r->height/2), &font, cvScalar(255, 255, 255, 0));
 
-	SendNewFace(response,xf,yf); //отправл€ем результат серво-модулю
+	SendNewFace(response,xf,yf); //send result to servo
 
 }
 

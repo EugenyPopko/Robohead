@@ -32,7 +32,7 @@ Mutex mut_new_data;				///<ћутекс, используетс€ дл€ последовательного доступа к 
 deque<MessageFromServo> deq;	///<ќсновной дек данных, передаваемых из потока приема файлов в распознавание
 
 
-///ћаксимальное количество потоков, запускаемых программой
+///Max thread count
 #define MAX_THREADS 8
 
 
@@ -47,7 +47,7 @@ int main( int argc, char** argv )
  cadr_receive cadr_r; //параметры, используемые потоком приема кадров
 
 
-//„тение файла конфигурации
+//Read configuration
  AutoPtr<IniFileConfiguration> cfg(new IniFileConfiguration);
  try
  {
@@ -55,23 +55,9 @@ int main( int argc, char** argv )
 
 	//threads=cfg->getInt("DEBUG.threads",1);  //считываем кол-во потоков распознавани€
 
-	rec_par.face_thresh=cfg->getDouble("RECOG.FaceThresh",100000000.0);	//порог
+	rec_par.face_thresh=cfg->getDouble("RECOG.FaceThresh",100000000.0);	//threshold for recognition
 
 	rec_par.channels=cfg->getInt("IMAGE.Channels",3);	//число каналов
-
-	
-/*
-	cadr_r.recog_application_ip     = cfg->getString("IPC.ToRecognizeFromSelectorIp","localhost");
-	cadr_r.recog_application_socket = cfg->getInt("IPC.ToRecognizeFromSelectorPort",14010);
-
-	rec_par.cadr_application_ip     = cfg->getString("IPC.ToSelectorFromScalesIp","localhost");
-	rec_par.cadr_application_port = cfg->getInt("IPC.ToSelectorFromRecognizePort",14005);
-*/
-
-
-
-
-
 
 	printf("Loading conf ok\n");
 
@@ -81,9 +67,6 @@ int main( int argc, char** argv )
 	printf("Error loading config!\n");
 	return -1;
  }
-
-
-
 
 
  Poco::Thread thread[MAX_THREADS];
