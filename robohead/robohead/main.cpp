@@ -53,11 +53,11 @@ int main( int argc, char** argv )
  {
 	cfg->load("conf.ini");
 
-	//threads=cfg->getInt("DEBUG.threads",1);  //считываем кол-во потоков распознавания
+	//threads=cfg->getInt("DEBUG.threads",1);  //threads count
 
 	rec_par.face_thresh=cfg->getDouble("RECOG.FaceThresh",100000000.0);	//threshold for recognition
 
-	rec_par.channels=cfg->getInt("IMAGE.Channels",3);	//число каналов
+	rec_par.channels=cfg->getInt("IMAGE.Channels",3);	//channels in images
 
 	printf("Loading conf ok\n");
 
@@ -71,10 +71,10 @@ int main( int argc, char** argv )
 
  Poco::Thread thread[MAX_THREADS];
 
- ReciverTask *synch_task = new ReciverTask(cadr_r);  //Поток приема команд
+ ReciverTask *synch_task = new ReciverTask(cadr_r);  //Thread for receiving commands
  thread[0].start(*synch_task);
 
- RecogTask *input_task = new RecogTask(rec_par); //1й поток распознавания. Присутствует всегда
+ RecogTask *input_task = new RecogTask(rec_par); //Recognition thread
  thread[1].start(*input_task);
 
 

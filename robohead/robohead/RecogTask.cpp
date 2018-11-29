@@ -1,5 +1,5 @@
 /**	\file RecogTask.cpp
-	\brief Файл с реализацией класса потока распознавания
+	\brief Class of recognition
 */
 #include "RecogTask.h"
 #include "ReciverTask.h"
@@ -93,7 +93,7 @@ int RecogTask::loadBase()
 
     sqlite3_close(db);
 
-	return i; //возвращаем число записей
+	return i; //return records count
 }
 
 /*****************************************************************************/
@@ -194,7 +194,7 @@ int RecogTask::loadFaces()
 
 		sprintf_s(imgFilename,"img/%s%d.bmp",facesDB[iFace].name,facesDB[iFace].img_id);
 
-        // загружаем изображение
+        // load img
 		IplImage * img=cvLoadImage(imgFilename, CV_LOAD_IMAGE_GRAYSCALE);
 
 		faceImgArr[iFace]=cvCreateImage(cvGetSize(img),IPL_DEPTH_8U,1);
@@ -214,18 +214,18 @@ int RecogTask::loadFaces()
 }
 
 /*****************************************************************************/
-//Поиск ближайшего соседа
+//k-nearest neighbor algorithm
 int RecogTask::findNearestNeighbor(float* projectedTestFace)
 {
     float leastDistSq = DBL_MAX;
     int iTrain, iNearest = 0;
 
-    for(iTrain=0; iTrain<TrainFaces_count; iTrain++) //по всем лицам
+    for(iTrain=0; iTrain<TrainFaces_count; iTrain++) //for all faces
     {
         float distSq=0;
         for(int i=0; i<Eigens_count; i++){
             float d_i = projectedTestFace[i] - projectedTrainFaceMat->data.fl[iTrain*Eigens_count + i];
-            distSq += d_i*d_i; //расстояние
+            distSq += d_i*d_i; //distance
         }
 
         if(distSq < leastDistSq){
@@ -234,7 +234,7 @@ int RecogTask::findNearestNeighbor(float* projectedTestFace)
         }
     }
 
-    if(rec_p_.face_thresh < leastDistSq) //должно быть больше порога
+    if(rec_p_.face_thresh < leastDistSq) //must be bigger than thresh
     {
         iNearest = -1;
     }
@@ -266,7 +266,7 @@ void RecogTask::storeTrainingData(void)
 }
 
 /*****************************************************************************/
-//Метод главных компонент
+//principal component analysis
 void RecogTask::PCA(void)
 {
     CvTermCriteria term_crit;
@@ -366,7 +366,7 @@ void RecogTask::training(void)
 }
 
 /*****************************************************************************/
-//Send new face to servo
+//Send new face to servo - id of person and coordinates
 void RecogTask::SendNewFace(int id, int x, int y)
 {
  MessageFromServo msg;
@@ -388,7 +388,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
     int i,j;
 	CvSeq *faces = cvHaarDetectObjects(img, cascade_f, storage, 1.1, 3, CV_HAAR_FIND_BIGGEST_OBJECT | CV_HAAR_DO_ROUGH_SEARCH, cvSize(130, 130)); //классификатор (каскад Хаара)
 
-    if (faces->total == 0) return; //при отсутствии лиц не продолжаем
+    if (faces->total == 0) return; //if no faces then exit
 
     CvRect *r = (CvRect*)cvGetSeqElem(faces, 0);
     cvRectangle(img, cvPoint(r->x, r->y),
@@ -422,7 +422,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
 		printf("save new img %s\n",bufstr);
 
         cvSaveImage(bufstr, tmpsize);
-        training(); //дообучение
+        training(); //additional training
 		loadTrainingData();
 
 		cvReleaseImage(&tmpsize);
@@ -439,7 +439,7 @@ void RecogTask::detectFaces(IplImage* img, int ident)
 				
 	IplImage *grayImg=cvCreateImage(cvSize(IMG_WIDTH, IMG_HEIGHT), IPL_DEPTH_8U,1);
 
-	cvCvtColor(sizedImg,grayImg,CV_BGR2GRAY); //перегоняем в серый
+	cvCvtColor(sizedImg,grayImg,CV_BGR2GRAY); //convert to gray
 
 	cvEqualizeHist(grayImg, testImg);
 
@@ -458,17 +458,17 @@ void RecogTask::detectFaces(IplImage* img, int ident)
     cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 1, CV_AA);
     cvPutText(img, bufstr, cvPoint(r->x, r->y+r->height/2), &font, cvScalar(255, 255, 255, 0));
 
-	SendNewFace(response,xf,yf); //send result to servo
+	SendNewFace(response,xf,yf); //send result to servo (id of person and coordinates)
 
 }
 
 /*****************************************************************************/
-//основной поток
+//main thread
 void  RecogTask::run()
 { 
 	printf("Start recog\n");
 
-	MessageFromServo fromDeq; //сообщение для распознавания, получаемое из дека
+	MessageFromServo fromDeq; //msg for recognition (from deq)
 	fromDeq.id=0; //сброс
 
     faceImgArr= 0; 
@@ -490,12 +490,12 @@ void  RecogTask::run()
 //	cvSetCaptureProperty(capture,CV_CAP_PROP_FRAME_HEIGHT,240);
 
     IplImage* frame;
-    cvNamedWindow( "CaptureWindow", CV_WINDOW_NORMAL );   // Основное Окно захвата
+    cvNamedWindow( "CaptureWindow", CV_WINDOW_NORMAL );   // Main window
     char key;
 
     cout << "  'ESC'  exit"                                        << endl;
 
-	training(); //дообучение
+	training(); //additional training
 	loadTrainingData();
 
 	testImg = cvCreateImage(cvSize(IMG_WIDTH,IMG_HEIGHT), IPL_DEPTH_8U,1);
@@ -504,34 +504,34 @@ void  RecogTask::run()
 //    if (writer!=0) printf("writer OK\n");
 
 	if( capture )
-    {
+	{
 		printf("Capture ready\n");
 		while (true)
 		{
 
 			if( !cvGrabFrame( capture )) break;		
-            frame = cvRetrieveFrame( capture );				//кадр с камеры
-			if( !frame ) {printf("Error frame\n");break;} //при отутствии кадра - выход
+			frame = cvRetrieveFrame( capture );				//frame from camera
+			if( !frame ) {printf("Error frame\n");break;} 
 			
-			//cvFlip(frame, frame, 0);					//переворот
+			//cvFlip(frame, frame, 0);					//rotate
 
 			mut_new_data.lock();	
-			if(!deq.empty()){  //дек не пуст
-				fromDeq=deq.front(); //берем первое из дека
+			if(!deq.empty()){  
+				fromDeq=deq.front(); //get first from deq
 				deq.pop_front(); 
 			}
 			mut_new_data.unlock();
 
-			key = cvWaitKey(1);   //ожидаем нажатия кнопки
+			key = cvWaitKey(1);   
 	//		if( key == 'l' ) fromDeq.id=10;
 
 #if (PRINT_DEBUG!= 0)
 			float t = (float)cvGetTickCount();	
 #endif
 			//printf("id=%d\n",fromDeq.id);
-			detectFaces(frame, fromDeq.id);   //поиск лиц
+			detectFaces(frame, fromDeq.id);   //find faces
 
-			fromDeq.id=0; //сброс
+			fromDeq.id=0; //reset
 
 //			cvWriteFrame(writer, frame);
 
@@ -542,14 +542,14 @@ void  RecogTask::run()
 
 			cvShowImage("CaptureWindow", frame);
 
-			if( key == 27 )  break;              //выход
+			if( key == 27 )  break;              //exit
             
 		}//while (true)
 	}
 
 //	cvReleaseVideoWriter(&writer);
 
-    cvReleaseCapture( &capture );
-    cvDestroyWindow( "CaptureWindow" );
+	cvReleaseCapture( &capture );
+	cvDestroyWindow( "CaptureWindow" );
 
 }

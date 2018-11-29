@@ -31,7 +31,7 @@ void ReciverTask::run()
 {
  printf("Start receiver\n");
 
- //јдрес и порт приложени€ распознавани€
+ //Address and port of app
  SocketAddress addr("localhost",11001);
 // SocketAddress addr(c_r_.servo_application_ip.c_str(),c_r_.servo_application_socket);
  DatagramSocket ds;
@@ -44,7 +44,7 @@ void ReciverTask::run()
 	deq.push_back(m_servo);
 	mut_new_data.unlock();
 
-	//Sleep(50); //ожидание
+	//Sleep(50); //wait
 	
  }
 
